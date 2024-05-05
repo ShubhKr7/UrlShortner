@@ -7,16 +7,18 @@ async function generateShortUrl(req,res){
     const result=await URL.create({
         shortId: shortId,
         redirectURL: req.body.url,
-        visitHistory:[]
+        visitHistory:[],
+        origin: req.user._id
     });
-    const allUrls=await URL.find({});
+    const allUrls=await URL.find({origin: req.user._id});
     return res.render("home",{
         urls: allUrls
     });
 }
 
 async function showAllEntries(req,res){
-    const allUrls=await URL.find({});
+    if(!req.user) return res.redirect('/user/login');
+    const allUrls=await URL.find({origin: req.user._id});
     return res.render("home",{
         urls: allUrls
     });

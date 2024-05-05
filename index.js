@@ -3,21 +3,27 @@ const path=require('path');
 const app=express();
 const PORT= 4567;
 const {connectToMongoDB}=require('./connection');
+const cookieParser = require('cookie-parser');
+const {checkUserAuth, isValidUser}=require('./middlewares/auth');
 
-//Static Routes (All HTML frontend content of the website)
-const staticRoutes=require("./routes/staticRouter");
 
 //Middlewares
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({extended: false}));
 
 //Routes
 const urlRoute=require('./routes/url');
+//Static Routes (All HTML frontend content of the website)
+const staticRoutes=require("./routes/staticRouter");
+const userRoutes = require('./routes/user');
+
 
 app.set("view engine","ejs");
 app.set("views", path.resolve("./views"));
-app.use("/",staticRoutes);
-app.use("/url",urlRoute);
+app.use("/",isValidUser,staticRoutes);
+app.use('/user',userRoutes);
+app.use("/url",checkUserAuth,urlRoute);
 
 //Connecting to mongoDB Server
 connectToMongoDB('mongodb://localhost:27017/compacturl')
